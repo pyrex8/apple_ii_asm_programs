@@ -38,7 +38,9 @@ enum
 
     GAME_TOP_TEXT_LINES,
     GAME_BOTTOM_TEXT_LINES,
-    GAME_AUDIO_FREQ_20X,
+    GAME_AUDIO_PULSE_PERIOD_MS,
+    GAME_AUDIO_PULSE_WIDTH_MS,
+    GAME_AUDIO_PULSE_COUNT,
     GAME_TEST_PIN,
 
     GAME_DATA_INDEX,
@@ -356,12 +358,14 @@ void sprite_data_copy(const uint8_t *data, uint8_t length)
 
 void chopper_draw(void)
 {
-    sprite_data(CHOPPER_FT, CHOPPER_FT_DATA + r * 48);
-    sprite_data(CHOPPER_FB, CHOPPER_FB_DATA + r * 48);
-    sprite_data(CHOPPER_MT, CHOPPER_MT_DATA + r * 48);
-    sprite_data(CHOPPER_MB, CHOPPER_MB_DATA + r * 48);
-    sprite_data(CHOPPER_BT, CHOPPER_BT_DATA + r * 48);
-    sprite_data(CHOPPER_BB, CHOPPER_BB_DATA + r * 48);
+    uint8_t frame = r >> 1;
+
+    sprite_data(CHOPPER_FT, CHOPPER_FT_DATA + frame * 48);
+    sprite_data(CHOPPER_FB, CHOPPER_FB_DATA + frame * 48);
+    sprite_data(CHOPPER_MT, CHOPPER_MT_DATA + frame * 48);
+    sprite_data(CHOPPER_MB, CHOPPER_MB_DATA + frame * 48);
+    sprite_data(CHOPPER_BT, CHOPPER_BT_DATA + frame * 48);
+    sprite_data(CHOPPER_BB, CHOPPER_BB_DATA + frame * 48);
 
     sprite_position(CHOPPER_FT, p + 14, q);
     sprite_position(CHOPPER_FB, p + 14, q + 8);
@@ -369,13 +373,6 @@ void chopper_draw(void)
     sprite_position(CHOPPER_MB, p + 7, q + 8);
     sprite_position(CHOPPER_BT, p, q);
     sprite_position(CHOPPER_BB, p, q + 8);
-}
-
-
-
-void sound(uint8_t frequency_x20)
-{
-    POKE(GAME_ADDR + GAME_AUDIO_FREQ_20X, frequency_x20);
 }
 
 void joystick(uint8_t *up, uint8_t *down, uint8_t *left, uint8_t *right, uint8_t *fire)
@@ -461,12 +458,16 @@ void main(void)
         y = 1;
     }
 
-    r ^= 1;
+    r = (r + 1) & 0x03;
 
     if (fire)
     {
-        f = 50;
+        f = y;
         sprite_position(PARACHUTE, x, y - 2);
+
+        POKE(GAME_ADDR + GAME_AUDIO_PULSE_PERIOD_MS, (x >> 4) + y);
+        POKE(GAME_ADDR + GAME_AUDIO_PULSE_WIDTH_MS, (x >> 4));
+        POKE(GAME_ADDR + GAME_AUDIO_PULSE_COUNT, 8);
     }
     else
     {
@@ -481,8 +482,6 @@ void main(void)
 
     n = random();
     m = random();
-
-    sound(f);
 
     sprite_position(SKY_DIVER, x, y);
 
