@@ -25,6 +25,17 @@ typedef unsigned short word;
 #define VIDEO_GRAPHICS_MODE 0xC050
 #define VIDEO_GRAPHIC_START_ADDR 0x2000
 
+typedef enum
+{
+    AUDIO_CYCLE_PULSE_COUNT = 0,
+    AUDIO_CYCLE_PULSE_FRAMES_1,
+    AUDIO_CYCLE_PULSE_FRAMES_2,
+    AUDIO_TRANSITION_PULSE_COUNT,
+    AUDIO_TRANSITION_PULSE_CLOCKS,
+    AUDIO_TRANSITION_PULSE_INCREMENT,
+    AUDIO_TRANSITION_PULSE_DECREMENT
+} AudioRegisters;
+
 enum
 {
     // write only registers
@@ -38,9 +49,7 @@ enum
 
     GAME_TOP_TEXT_LINES,
     GAME_BOTTOM_TEXT_LINES,
-    GAME_AUDIO_PULSE_PERIOD_MS,
-    GAME_AUDIO_PULSE_WIDTH_MS,
-    GAME_AUDIO_PULSE_COUNT,
+    GAME_AUDIO_SOUND_INDEX,
     GAME_TEST_PIN,
 
     GAME_DATA_INDEX,
@@ -60,6 +69,7 @@ enum
     GAME_JOYSTICK_RIGHT,
     GAME_JOYSTICK_FIRE,
     GAME_RANDOM_NUM,
+    GAME_AUDIO_RUNNING,
     GAME_30HZ,
 };
 
@@ -250,8 +260,27 @@ const byte sprites[] =
     0x00,
     0x00,
 
+    // fire sound
+    0x04, // AUDIO_CYCLE_PULSE_COUNT
+    0x02, // AUDIO_CYCLE_PULSE_FRAMES_1
+    0x01, // AUDIO_CYCLE_PULSE_FRAMES_2
+    0x08, // AUDIO_TRANSITION_PULSE_COUNT
+    0x01, // AUDIO_TRANSITION_PULSE_CLOCKS
+    0x01, // AUDIO_TRANSITION_PULSE_INCREMENT
+    0x00, // AUDIO_TRANSITION_PULSE_DECREMENT
+    0x00, // unused
 
+    // chopper sound
+    0x08, // AUDIO_CYCLE_PULSE_COUNT
+    0x03, // AUDIO_CYCLE_PULSE_FRAMES_1
+    0x03, // AUDIO_CYCLE_PULSE_FRAMES_2
+    0x10, // AUDIO_TRANSITION_PULSE_COUNT
+    0x01, // AUDIO_TRANSITION_PULSE_CLOCKS
+    0x00, // AUDIO_TRANSITION_PULSE_INCREMENT
+    0x00, // AUDIO_TRANSITION_PULSE_DECREMENT
+    0x00, // unused
  };
+
 
 #define SKY_DIVER_DATA 8
 #define PARACHUTE_DATA 16
@@ -271,6 +300,8 @@ const byte sprites[] =
 #define CHOPPER_MB1_DATA 120
 #define CHOPPER_BT1_DATA 128
 #define CHOPPER_BB1_DATA 136
+#define CHOPPER_FIRE_SOUND 144
+#define CHOPPER_CHOPPER_SOUND 152
 
 uint8_t i = 0;
 uint8_t j = 0;
@@ -399,7 +430,7 @@ void main(void)
     graphics_mode();
 
     text_top(1);
-    text_bottom(0);
+    text_bottom(1);
 
     sprite_data(SKY_DIVER, SKY_DIVER_DATA);
     sprite_data(PARACHUTE, PARACHUTE_DATA);
@@ -422,7 +453,6 @@ void main(void)
 
     while (1)
     {
-    f = 0;
     TEST_PIN_HIGH;
 
     joystick(&up, &down, &left, &right, &fire);
@@ -462,12 +492,14 @@ void main(void)
 
     if (fire)
     {
-        f = y;
         sprite_position(PARACHUTE, x, y - 2);
 
-        POKE(GAME_ADDR + GAME_AUDIO_PULSE_PERIOD_MS, (x >> 4) + y);
-        POKE(GAME_ADDR + GAME_AUDIO_PULSE_WIDTH_MS, (x >> 4));
-        POKE(GAME_ADDR + GAME_AUDIO_PULSE_COUNT, 8);
+        f = PEEK(GAME_ADDR + GAME_AUDIO_RUNNING);
+        // printf ("\nGAME_AUDIO_RUNNING = %hhu", f);
+        if (f == 0)
+        {
+            POKE(GAME_ADDR + GAME_AUDIO_SOUND_INDEX, CHOPPER_CHOPPER_SOUND);
+        }
     }
     else
     {
@@ -476,7 +508,6 @@ void main(void)
 
     if (sprite_collision(SKY_DIVER))
     {
-        f = 25;
         sprite_collision_clear();
     }
 
