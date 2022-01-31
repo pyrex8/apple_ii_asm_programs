@@ -25,17 +25,6 @@ typedef unsigned short word;
 #define VIDEO_GRAPHICS_MODE 0xC050
 #define VIDEO_GRAPHIC_START_ADDR 0x2000
 
-typedef enum
-{
-    AUDIO_CYCLE_PULSE_COUNT = 0,
-    AUDIO_CYCLE_PULSE_FRAMES_1,
-    AUDIO_CYCLE_PULSE_FRAMES_2,
-    AUDIO_TRANSITION_PULSE_COUNT,
-    AUDIO_TRANSITION_PULSE_CLOCKS,
-    AUDIO_TRANSITION_PULSE_INCREMENT,
-    AUDIO_TRANSITION_PULSE_DECREMENT
-} AudioRegisters;
-
 enum
 {
     // write only registers
@@ -49,7 +38,9 @@ enum
 
     GAME_TOP_TEXT_LINES,
     GAME_BOTTOM_TEXT_LINES,
-    GAME_AUDIO_SOUND_INDEX,
+    GAME_AUDIO_FRAME_WAVEFORM,
+    GAME_AUDIO_PULSE_COUNT,
+    GAME_AUDIO_PULSE_CLKS,
     GAME_TEST_PIN,
 
     GAME_DATA_INDEX,
@@ -69,7 +60,7 @@ enum
     GAME_JOYSTICK_RIGHT,
     GAME_JOYSTICK_FIRE,
     GAME_RANDOM_NUM,
-    GAME_AUDIO_RUNNING,
+    GAME_AUDIO_FRAMES_REMAINING,
     GAME_30HZ,
 };
 
@@ -259,46 +250,6 @@ const byte sprites[] =
     0x00,
     0x00,
     0x00,
-
-    // fire sound
-    5, // AUDIO_CYCLE_PULSE_COUNT
-    3, // AUDIO_CYCLE_PULSE_FRAMES_1
-    1, // AUDIO_CYCLE_PULSE_FRAMES_2
-    9, // AUDIO_TRANSITION_PULSE_COUNT
-    1, // AUDIO_TRANSITION_PULSE_CLOCKS
-    1, // AUDIO_TRANSITION_PULSE_INCREMENT
-    0, // AUDIO_TRANSITION_PULSE_DECREMENT
-    0, // unused
-
-    // chopper sound
-    8, // AUDIO_CYCLE_PULSE_COUNT
-    3, // AUDIO_CYCLE_PULSE_FRAMES_1
-    3, // AUDIO_CYCLE_PULSE_FRAMES_2
-    17, // AUDIO_TRANSITION_PULSE_COUNT
-    1, // AUDIO_TRANSITION_PULSE_CLOCKS
-    0, // AUDIO_TRANSITION_PULSE_INCREMENT
-    0, // AUDIO_TRANSITION_PULSE_DECREMENT
-    0, // unused
-
-    // explosion sound
-    8, // AUDIO_CYCLE_PULSE_COUNT
-    3, // AUDIO_CYCLE_PULSE_FRAMES_1
-    3, // AUDIO_CYCLE_PULSE_FRAMES_2
-    9, // AUDIO_TRANSITION_PULSE_COUNT
-    20, // AUDIO_TRANSITION_PULSE_CLOCKS
-    0, // AUDIO_TRANSITION_PULSE_INCREMENT
-    1, // AUDIO_TRANSITION_PULSE_DECREMENT
-    0, // unused
-
-    // experiment sound
-    2, // AUDIO_CYCLE_PULSE_COUNT
-    1, // AUDIO_CYCLE_PULSE_FRAMES_1
-    1, // AUDIO_CYCLE_PULSE_FRAMES_2
-    9, // AUDIO_TRANSITION_PULSE_COUNT
-    255, // AUDIO_TRANSITION_PULSE_CLOCKS
-    0, // AUDIO_TRANSITION_PULSE_INCREMENT
-    0, // AUDIO_TRANSITION_PULSE_DECREMENT
-    0, // unused
  };
 
 
@@ -320,10 +271,11 @@ const byte sprites[] =
 #define CHOPPER_MB1_DATA 120
 #define CHOPPER_BT1_DATA 128
 #define CHOPPER_BB1_DATA 136
-#define FIRE_SOUND 144
-#define CHOPPER_SOUND 152
-#define EXPLOSION_SOUND 160
-#define EXPERIMENT_SOUND 168
+
+
+uint8_t a = 0;
+uint8_t b = 0;
+uint8_t c = 0;
 
 uint8_t i = 0;
 uint8_t j = 0;
@@ -452,7 +404,7 @@ void main(void)
     graphics_mode();
 
     text_top(1);
-    text_bottom(1);
+    text_bottom(0);
 
     sprite_data(SKY_DIVER, SKY_DIVER_DATA);
     sprite_data(PARACHUTE, PARACHUTE_DATA);
@@ -483,6 +435,9 @@ void main(void)
     y += down - up;
 
     p +=1;
+
+    x = p + 12;
+    y = q + 16;
 
     if(p == 255)
     {
@@ -516,12 +471,52 @@ void main(void)
     {
         sprite_position(PARACHUTE, x, y - 2);
 
-        f = PEEK(GAME_ADDR + GAME_AUDIO_RUNNING);
-        // printf ("\nGAME_AUDIO_RUNNING = %hhu", f);
-       if (f == 0)
+        if (c >= 10)
         {
-            POKE(GAME_ADDR + GAME_AUDIO_SOUND_INDEX, EXPLOSION_SOUND);
+            a = 0x31;
+            b = 9;
+            c = 2;
         }
+
+            // // fire sound
+            // 8, // AUDIO_CYCLE_PULSE_COUNT
+            // 3, // AUDIO_CYCLE_PULSE_FRAMES_1
+            // 1, // AUDIO_CYCLE_PULSE_FRAMES_2
+            // 9, // AUDIO_TRANSITION_PULSE_COUNT
+            // 16, // AUDIO_TRANSITION_PULSE_CLOCKS
+            // 4, // AUDIO_TRANSITION_PULSE_INCREMENT
+            // 0, // AUDIO_TRANSITION_PULSE_DECREMENT
+            // 0, // unused
+            //
+            // // chopper sound
+            // 8, // AUDIO_CYCLE_PULSE_COUNT
+            // 3, // AUDIO_CYCLE_PULSE_FRAMES_1
+            // 3, // AUDIO_CYCLE_PULSE_FRAMES_2
+            // 17, // AUDIO_TRANSITION_PULSE_COUNT
+            // 1, // AUDIO_TRANSITION_PULSE_CLOCKS
+            // 0, // AUDIO_TRANSITION_PULSE_INCREMENT
+            // 0, // AUDIO_TRANSITION_PULSE_DECREMENT
+            // 0, // unused
+            //
+            // // explosion sound
+            // 8, // AUDIO_CYCLE_PULSE_COUNT
+            // 3, // AUDIO_CYCLE_PULSE_FRAMES_1
+            // 3, // AUDIO_CYCLE_PULSE_FRAMES_2
+            // 9, // AUDIO_TRANSITION_PULSE_COUNT
+            // 20, // AUDIO_TRANSITION_PULSE_CLOCKS
+            // 0, // AUDIO_TRANSITION_PULSE_INCREMENT
+            // 1, // AUDIO_TRANSITION_PULSE_DECREMENT
+            // 0, // unused
+            //
+            // // experiment sound
+            // 2, // AUDIO_CYCLE_PULSE_COUNT
+            // 1, // AUDIO_CYCLE_PULSE_FRAMES_1
+            // 1, // AUDIO_CYCLE_PULSE_FRAMES_2
+            // 9, // AUDIO_TRANSITION_PULSE_COUNT
+            // 255, // AUDIO_TRANSITION_PULSE_CLOCKS
+            // 0, // AUDIO_TRANSITION_PULSE_INCREMENT
+            // 0, // AUDIO_TRANSITION_PULSE_DECREMENT
+            // 0, // unused
     }
     else
     {
@@ -546,6 +541,21 @@ void main(void)
     // {
     //     printf ("\nlocation %hhu, %hhu", x, y);
     // }
+
+    f = PEEK(GAME_ADDR + GAME_AUDIO_FRAMES_REMAINING);
+    // printf ("\nGAME_AUDIO_RUNNING = %hhu", f);
+   if (f <= 1)
+    {
+        if (c < 10)
+        {
+            c += 1;
+
+            POKE(GAME_ADDR + GAME_AUDIO_FRAME_WAVEFORM, a);
+            POKE(GAME_ADDR + GAME_AUDIO_PULSE_COUNT, b);
+            POKE(GAME_ADDR + GAME_AUDIO_PULSE_CLKS, c);
+        }
+    }
+
 
     x_last = x;
     y_last = y;
