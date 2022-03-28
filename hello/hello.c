@@ -8,7 +8,7 @@ void main(void)
 
    while(1)
    {
-       TEST_PIN_HIGH;
-       TEST_PIN_LOW;
+       TEST_PIN_TOGGLE;
+       TEST_PIN_TOGGLE;
    }
 }

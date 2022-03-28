@@ -5,8 +5,8 @@
 
 #include <peekpoke.h>
 
-#define TEST_PIN_ADDR 0xC0F0
-#define TEST_PIN_LOW POKE(TEST_PIN_ADDR, 0)
-#define TEST_PIN_HIGH POKE(TEST_PIN_ADDR, 1)
+#define CASSETTE_OUT_ADDR 0xC020
+#define TEST_PIN_ADDR CASSETTE_OUT_ADDR
+#define TEST_PIN_TOGGLE POKE(TEST_PIN_ADDR, 0)
 
 #endif /* __TEST_PIN_H__ */
