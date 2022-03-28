@@ -21,7 +21,7 @@
 void delay(void)
 {
     uint8_t i = 0;
-    for (i = 0; i < 19; i++)
+    for (i = 0; i < 28; i++)
     {
     }
 
@@ -35,6 +35,7 @@ void delay(void)
 // works
 // 19 counts = 1760us / 1.5us = 1173 clocks
 // 20 counts = 1880us / 1.5us = 1253 clocks
+// 28 counts = 2560us / 1.5us = 1706 clocks
 // 30 counts = 2680us / 1.5us = 1786 clocks
 // 35 counts = 3160us / 1.5us = 2106 clocks
 // 38 counts = 3360us / 1.5us = 2240 clocks
