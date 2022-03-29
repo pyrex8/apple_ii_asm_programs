@@ -58,17 +58,16 @@ void main(void)
 
     while(1)
     {
-       fire = JOYSTICK_FIRE;
-       JOYSTICK_START;
-       left = JOYSTICK_LEFT;
-       up = JOYSTICK_UP;
-       TEST_PIN_TOGGLE;
-       delay();
-       TEST_PIN_TOGGLE;
-       right = JOYSTICK_RIGHT;
-       down = JOYSTICK_DOWN;
-       printf("F, L, R, U, D = (%hhu, %hhu, %hhu, %hhu, %hhu)\n", fire, left, right, up, down);
-
+        fire = JOYSTICK_FIRE;
+        JOYSTICK_START;
+        left = JOYSTICK_LEFT;
+        up = JOYSTICK_UP;
+        TEST_PIN_TOGGLE;
+        delay();
+        TEST_PIN_TOGGLE;
+        right = JOYSTICK_RIGHT;
+        down = JOYSTICK_DOWN;
+        printf("F, L, R, U, D = (%hhu, %hhu, %hhu, %hhu, %hhu)\n", fire, left, right, up, down);
     }
 }
 
