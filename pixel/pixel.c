@@ -16,8 +16,25 @@
 
 #define VHEIGHT 192	// number of scanlines
 #define PIXELS 11
+#define PIXELS_TOTAL 11
 
-uint8_t xb;
+// put pixels in array
+// save old location, old mask
+// array of x and y, and color
+// array of change pixel (limited)
+// calcluate new location, new mask
+// interate throught old - new pixel (xor pixel function)
+
+static uint8_t pixel_x[PIXELS_TOTAL];
+static uint8_t pixel_y[PIXELS_TOTAL];
+//static uint8_t pixel_color[PIXELS_TOTAL];
+//static uint8_t pixel_new[PIXELS_TOTAL];
+static uint8_t pixel_mask_old[PIXELS_TOTAL];
+static uint8_t pixel_mask_new[PIXELS_TOTAL];
+static uint16_t pixel_addr_old[PIXELS_TOTAL];
+static uint16_t pixel_addr_new[PIXELS_TOTAL];
+
+uint8_t pixel;
 uint8_t mask;
 uint8_t value;
 uint16_t addr;
@@ -78,6 +95,10 @@ const uint8_t MOD7[256] = {
 // bitmask table
 const uint8_t BIT7[7] = { 1, 2, 4, 8, 16, 32, 64 };
 
+
+#define PIXEL_ADDRESS(x, y) (vidline[y] + DIV7[x])
+#define PIXEL_MASK(x) (BIT7[MOD7[x]])
+
 /// GRAPHICS FUNCTIONS
 
 // clear screen and set graphics mode
@@ -89,18 +110,29 @@ void clrscr() {
   memset((uint8_t*)0x2000, 0, 0x2000); // clear page 1
 }
 
-// 730us
-void pixel(uint8_t x, uint8_t y)
+
+void pixel_calc_update(void)
 {
-    // 600us
-//    TEST_PIN_TOGGLE;
-    xb = DIV7[x]; // 70us
-    mask = BIT7[MOD7[x]]; // 118us
-    addr = vidline[y] + xb; // 252us
-    value = PEEK(addr);
-    value ^= mask;
-    POKE(addr,value); // 178us
-//    TEST_PIN_TOGGLE;
+    for (pixel = 0; pixel < PIXELS_TOTAL; pixel++)
+    {
+        pixel_addr_old[pixel] = pixel_addr_new[pixel];
+        pixel_addr_new[pixel] = PIXEL_ADDRESS(pixel_x[pixel], pixel_y[pixel]);
+        pixel_mask_old[pixel] = pixel_mask_new[pixel];
+        pixel_mask_new[pixel] = PIXEL_MASK(pixel_x[pixel]);
+    }
+}
+
+void pixel_display_update(void)
+{
+    for (pixel = 0; pixel < PIXELS_TOTAL; pixel++)
+    {
+        value = PEEK(pixel_addr_old[pixel]);
+        value ^= pixel_mask_old[pixel];
+        POKE(pixel_addr_old[pixel],value);
+        value = PEEK(pixel_addr_new[pixel]);
+        value ^= pixel_mask_new[pixel];
+        POKE(pixel_addr_new[pixel],value);
+    }
 }
 
 void main(void)
@@ -108,18 +140,17 @@ void main(void)
     uint8_t i = 0;
     uint8_t x = 0;
     clrscr();
-    pixel(x,50);
 
     while(1)
     {
-        for(i = 0; i < PIXELS; i++)
+        TEST_PIN_TOGGLE;
+        x += 4;
+        for(i = 0; i < PIXELS_TOTAL; i++)
         {
-            pixel(x,50 + i);
+            pixel_x[i] = x;
+            pixel_y[i] = 50 + i;
         }
-        x++;
-        for(i = 0; i < PIXELS; i++)
-        {
-            pixel(x,50 + i);
-        }
+        pixel_calc_update();
+        pixel_display_update();
    }
 }
