@@ -1,9 +1,8 @@
 TARGET = $(notdir $(shell pwd))
 
-ALL_C = $(wildcard *.c) $(wildcard *.h)
-
-all: $(ALL_C)
-	cl65 -v -W error -t apple2 -C apple2-hgr2.cfg -o $(TARGET).bin -l $(TARGET).list $(TARGET).c
+all:
+	ca65 $(TARGET).asm -D BASE=0x0803
+	cl65 $(TARGET).o --target none --start-addr 0x0803 -o $(TARGET).bin
 
 clean:
-	rm -f *.bin *.list *.o
+	rm -f *.bin *.o
