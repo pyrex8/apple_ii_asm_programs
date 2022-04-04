@@ -15,4 +15,4 @@ loop:
 done:   rts         ; Return
 
 msg:    .byte "Hello, World!"    ; Generate ASCII character codes
-        .byte  $8D, 00           ; Define byte: 8D is return, 00 is end
+        .byte  $8D, $00           ; Define byte: 8D is return, 00 is end
