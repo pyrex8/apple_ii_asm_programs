@@ -6,7 +6,7 @@ cout = $FDED   ; Define cout label (character out)
 
 ; Numeric constants
 
-NBALLS      = 2             ; Number of balls to bounce
+NBALLS      = 30            ; Number of balls to bounce
 COLUMNS     = 40            ; Number of columns/bytes per row
 WHITE       = $7F           ; White hires byte
 RKEY        = $D2           ; Code for when "R" is pressed
@@ -347,17 +347,23 @@ BALL1:
         ; Position and velocity information for each ball
 
 BALLXL:
-        .byte NBALLS        ; 0,8,...,48 = horizontal shift
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 BALLYL:
-        .byte NBALLS
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 BALLDYL:
-        .byte NBALLS
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 BALLDYH:
-        .byte NBALLS
-
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 BALLDX:
-        .byte NBALLS        ; 8 = one pixel horizontal
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 BALLXH:
-        .byte NBALLS        ; column/byte
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 BALLYH:
-        .byte NBALLS        ; row
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+        .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
