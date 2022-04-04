@@ -2,7 +2,7 @@
 ; Advanced 6502 Assembly Programming for the Apple II, by Stephen Edwards
 ; http://www.cs.columbia.edu/~sedwards/2020-vcfw-6502/
 
-cout = $FDED   ; Define cout label (character out)
+cout = $FDED                ; Define cout label (character out)
 
 ; Numeric constants
 
@@ -40,15 +40,15 @@ balls:
 
         lda #WHITE
         ldy #0
-        jsr hline	; White line on the top row
+        jsr hline           ; White line on the top row
         ldy #191
-        jsr hline	; White line on the bottom row
+        jsr hline           ; White line on the bottom row
         lda #%00000011
         ldy #0
-        jsr vline	; White line on the left column
+        jsr vline           ; White line on the left column
         lda #%01100000
         ldy #COLUMNS-1
-        jsr vline	; White line on the right column
+        jsr vline           ; White line on the right column
 
 ; Initialize the ball positions and speeds
 
@@ -65,7 +65,7 @@ init0:
         ldx #NBALLS-1
         ldy #1
 initl:
-        tya		; Linear feedback shift register
+        tya                 ; Linear feedback shift register
         lsr
         bcc skip
         eor #$c0
@@ -96,7 +96,7 @@ update:
         lda #NBALLS-1
         sta BALL
 uploop:
-        jsr xorball	; erase the ball in its current position
+        jsr xorball         ; erase the ball in its current position
         ldx BALL
 
 ; Update horizontal position
@@ -106,22 +106,22 @@ uploop:
         adc BALLDX,x
         bpl noxunderflow
 
-        adc #56		; Correct for underflow; carry is clear
+        adc #56             ; Correct for underflow, carry is clear
         sta BALLXL,x
         dec BALLXH,x
-        bne xdone	; Hit the left wall?
-        beq bouncex	; Yes: bounce
+        bne xdone           ; Hit the left wall?
+        beq bouncex         ; Yes: bounce
 
 noxunderflow:
         sta BALLXL,x
         sec
         sbc #56
-        bcc xdone	; No overflow?
+        bcc xdone           ; No overflow?
 
         sta BALLXL,x
         inc BALLXH,x
         ldy BALLXH,x
-        cpy #COLUMNS-2	; Hit the right wall?
+        cpy #COLUMNS-2      ; Hit the right wall?
         bne xdone
 bouncex:
         sec
@@ -165,25 +165,25 @@ xdone:
         sbc BALLDYH,x
         sta BALLDYH,x
 nobounce:
-        jsr xorball 	; draw the ball in its new position
+        jsr xorball     ; draw the ball in its new position
 
         dec BALL
         bpl uploop
 
-        bit KBD		; Key pressed?
+        bit KBD         ; Key pressed?
         bmi pressed
-        jmp update	; No, update everything
+        jmp update      ; No, update everything
 
 pressed:
         lda KBD
-        cmp #RKEY	; Was R pressed?
+        cmp #RKEY       ; Was R pressed?
         bne quit
-        bit KBDSTRB	; Clear the key
-        jmp balls	; Restart
+        bit KBDSTRB     ; Clear the key
+        jmp balls       ; Restart
 
 quit:
-        bit KBDSTRB	; Clear the key
-        bit TXTSET	; Switch to text mode
+        bit KBDSTRB     ; Clear the key
+        bit TXTSET      ; Switch to text mode
         rts
 
 ; Draw a horizontal line
@@ -198,7 +198,7 @@ hline:
         sta GBASL
         lda LKHI,y
         sta GBASH
-        ldy #COLUMNS-1	; Width of screen in bytes
+        ldy #COLUMNS-1  ; Width of screen in bytes
         pla
 hl1:
         sta (GBASL),y
@@ -214,36 +214,36 @@ hl1:
 
 vline:
         sta HCOLOR1
-        ldx #190	; Start at second-to-last row
+        ldx #190        ; Start at second-to-last row
 vl1:
-        lda LKLO,x	; Get the row address
+        lda LKLO,x      ; Get the row address
         sta GBASL
         lda LKHI,x
         sta GBASH
         lda HCOLOR1
-        sta (GBASL),y	; Write the color byte
-        dex 		; Previous row
+        sta (GBASL),y   ; Write the color byte
+        dex             ; Previous row
         bne vl1
         rts
 
-        ; Clear and switch to hires page 1
-        ; Uses GBASL and GBASH
+; Clear and switch to hires page 1
+; Uses GBASL and GBASH
 
 hclear:
-        ldx #>HGR1SCRN	; $20, also the number of pages to clear
+        ldx #>HGR1SCRN  ; $20, also the number of pages to clear
         stx GBASH
-        lda #0		; Clear to black
+        lda #0          ; Clear to black
         sta GBASL
         tay
 hclr1:
         sta (GBASL),y
         iny
-        bne hclr1	; Done with the page?
+        bne hclr1       ; Done with the page?
         inc GBASH
         dex
-        bne hclr1	; Done with all pages?
+        bne hclr1       ; Done with all pages?
 
-        bit HIRES	; Switch to hires mode
+        bit HIRES       ; Switch to hires mode
         bit TXTCLR
         rts
 
@@ -257,16 +257,16 @@ hclr1:
 
 xorball:
         ldy BALL
-        lda BALLYH,y	; Get row
+        lda BALLYH,y    ; Get row
         sta HGRY
-        lda BALLXH,y	; Get column
+        lda BALLXH,y    ; Get column
         sta HGRX
-        lda BALLXL,y	; Get Shift (0,8,...,48)
+        lda BALLXL,y    ; Get Shift (0,8,...,48)
         and #$38
-        tax		; Offset into sprite table (pixel * 8)
+        tax             ; Offset into sprite table (pixel * 8)
 
 xsplot:
-        ldy HGRY	; Get the row address
+        ldy HGRY        ; Get the row address
         lda LKLO,y
         sta GBASL
         lda LKHI,y
@@ -274,7 +274,7 @@ xsplot:
         iny
         sty HGRY
 
-        ldy HGRX	; XOR the two bytes onto the screen
+        ldy HGRX        ; XOR the two bytes onto the screen
 
 ; (GBASL, GBASH) = row address
 ; Y = byte offset into the row
@@ -291,7 +291,7 @@ xsplot:
 
         txa
         and #7
-        bne xsplot	; Stop at a multiple of 8 bytes
+        bne xsplot      ; Stop at a multiple of 8 bytes
         rts
 
 ; Hires row address lookup tables, after Pelczarski, Graphically Speaking
@@ -324,7 +324,7 @@ LKLO:
         .byte $50, $50, $50, $50, $50, $50, $50, $50, $d0, $d0, $d0, $d0, $d0, $d0, $d0, $d0
         .byte $50, $50, $50, $50, $50, $50, $50, $50, $d0, $d0, $d0, $d0, $d0, $d0, $d0, $d0
 
-        ; Eight bytes per sprite, first bytes
+; Eight bytes per sprite, first bytes
 
 BALL0:
         .byte %00111100, %01111111, %01111111, %01111111, %01111111, %01111111, %01111111, %00111100
@@ -344,7 +344,7 @@ BALL1:
         .byte %00001111, %00111111, %00111111, %00111111, %00111111, %00111111, %00111111, %00001111
         .byte %00011110, %01111111, %01111111, %01111111, %01111111, %01111111, %01111111, %00011110
 
-        ; Position and velocity information for each ball
+; Position and velocity information for each ball
 
 BALLXL:
         .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
